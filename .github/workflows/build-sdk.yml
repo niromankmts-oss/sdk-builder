@@ -1,0 +1,33 @@
+name: Build MacOS SDK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OSXCross
+        uses: actions/checkout@v4
+        with:
+          repository: tpoechtrager/osxcross
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake libssl-dev lzma-dev libxml2-dev cpio pbzx
+
+      - name: Download Xcode .xip
+        run: |
+          pip3 install xcodes
+          xcodes download 16.0 --directory . --uncompress=false || true
+
+      - name: Generate SDK Package
+        run: |
+          tools/gen_sdk_package_pbzx.sh *.xip
+
+      - name: Upload SDK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-sdk
+          path: "*.sdk.tar.xz"
