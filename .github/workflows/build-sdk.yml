@@ -15,19 +15,16 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake libssl-dev lzma-dev libxml2-dev cpio pbzx
+          sudo apt-get install -y clang cmake libssl-dev lzma-dev libxml2-dev cpio
 
-      - name: Download Xcode .xip
+      - name: Download Pre-packaged MacOS SDK
         run: |
-          pip3 install xcodes
-          xcodes download 16.0 --directory . --uncompress=false || true
-
-      - name: Generate SDK Package
-        run: |
-          tools/gen_sdk_package_pbzx.sh *.xip
+          # 既成の MacOSX15.sdk を取得してアーカイブ化
+          mkdir -p tarball
+          curl -L -o tarball/MacOSX15.0.sdk.tar.xz https://github.com/joseluisq/macosx-sdks/releases/download/15.0/MacOSX15.0.sdk.tar.xz
 
       - name: Upload SDK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-sdk
-          path: "*.sdk.tar.xz"
+          path: "tarball/*.sdk.tar.xz"
